@@ -1,5 +1,7 @@
 package su.nightexpress.coinsengine;
 
+import org.bukkit.Bukkit;
+import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
 import su.nightexpress.coinsengine.api.CoinsEngineAPI;
 import su.nightexpress.coinsengine.command.CommandManager;
@@ -30,6 +32,7 @@ public class CoinsEnginePlugin extends NightPlugin {
     private TopManager       topManager;
     private MigrationManager migrationManager;
     private CommandManager   commandManager;
+    private BukkitTask       databaseSyncTask;
 
     @Override
     protected void onStartup() {
@@ -48,6 +51,8 @@ public class CoinsEnginePlugin extends NightPlugin {
         this.dataHandler.setup();
         this.userManager.setup();
         this.currencyManager.setup();
+
+        this.scheduleDatabaseSynchronization();
 
         if (Config.isTopsEnabled()) {
             this.topManager = new TopManager(this, this.currencyRegistry);
@@ -92,6 +97,10 @@ public class CoinsEnginePlugin extends NightPlugin {
         if (this.userManager != null) this.userManager.shutdown();
         if (this.dataHandler != null) this.dataHandler.shutdown();
         if (this.currencyManager != null) this.currencyManager.shutdown();
+        if (this.databaseSyncTask != null) {
+            this.databaseSyncTask.cancel();
+            this.databaseSyncTask = null;
+        }
     }
 
     @Override
@@ -107,6 +116,23 @@ public class CoinsEnginePlugin extends NightPlugin {
         return PluginDetails.create("Economy", new String[]{"coinsengine", "coe"})
             .setConfigClass(Config.class)
             .setPermissionsClass(Perms.class);
+    }
+
+    private void scheduleDatabaseSynchronization() {
+        String databaseType = Config.DATABASE_TYPE.get();
+        if ("SQLITE".equalsIgnoreCase(databaseType)) return;
+
+        int intervalSeconds = Config.DATABASE_SYNC_INTERVAL.get();
+        if (intervalSeconds < 0) return;
+
+        long periodTicks = intervalSeconds * 20L;
+        if (periodTicks <= 0L) return;
+
+        this.databaseSyncTask = Bukkit.getScheduler().runTaskTimerAsynchronously(this, () -> {
+            if (this.dataHandler != null) {
+                this.dataHandler.onSynchronize();
+            }
+        }, periodTicks, periodTicks);
     }
 
     @NotNull
