@@ -73,6 +73,7 @@ public class DataHandler extends AbstractUserDataManager<CoinsEnginePlugin, Coin
         super.onInitialize();
 
         this.dropColumn(this.tableUsers, "balances", "currencyData");
+        this.addColumn(this.tableUsers, Column.of("last_modified", ColumnType.LONG), String.valueOf(0));
         this.addColumn(this.tableUsers, COLUMN_SETTINGS, "{}");
         this.addColumn(this.tableUsers, COLUMN_HIDE_FROM_TOPS, String.valueOf(0));
     }
