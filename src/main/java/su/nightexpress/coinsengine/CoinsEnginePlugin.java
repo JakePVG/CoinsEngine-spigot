@@ -18,8 +18,6 @@ import su.nightexpress.coinsengine.user.UserManager;
 import su.nightexpress.nightcore.NightPlugin;
 import su.nightexpress.nightcore.config.PluginDetails;
 import su.nightexpress.nightcore.util.Plugins;
-import org.bukkit.Bukkit;
-import org.bukkit.scheduler.BukkitTask;
 
 import java.util.Optional;
 
@@ -32,7 +30,6 @@ public class CoinsEnginePlugin extends NightPlugin {
     private TopManager       topManager;
     private MigrationManager migrationManager;
     private CommandManager   commandManager;
-    private BukkitTask       synchronizationTask;
 
     @Override
     protected void onStartup() {
@@ -51,7 +48,6 @@ public class CoinsEnginePlugin extends NightPlugin {
         this.dataHandler.setup();
         this.userManager.setup();
         this.currencyManager.setup();
-        this.startSynchronizationTask();
 
         if (Config.isTopsEnabled()) {
             this.topManager = new TopManager(this, this.currencyRegistry);
@@ -96,10 +92,6 @@ public class CoinsEnginePlugin extends NightPlugin {
         if (this.userManager != null) this.userManager.shutdown();
         if (this.dataHandler != null) this.dataHandler.shutdown();
         if (this.currencyManager != null) this.currencyManager.shutdown();
-        if (this.synchronizationTask != null) {
-            this.synchronizationTask.cancel();
-            this.synchronizationTask = null;
-        }
     }
 
     @Override
@@ -150,17 +142,5 @@ public class CoinsEnginePlugin extends NightPlugin {
     @NotNull
     public UserManager getUserManager() {
         return this.userManager;
-    }
-
-    private void startSynchronizationTask() {
-        int interval = Config.DATABASE_SYNC_INTERVAL.get();
-        if (interval <= 0) return;
-
-        long ticks = interval * 20L;
-        this.synchronizationTask = Bukkit.getScheduler().runTaskTimerAsynchronously(this, () -> {
-            if (this.dataHandler != null) {
-                this.dataHandler.onSynchronize();
-            }
-        }, ticks, ticks);
     }
 }
