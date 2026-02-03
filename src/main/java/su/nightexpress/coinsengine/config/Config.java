@@ -102,6 +102,13 @@ public class Config {
         "Controls how often currency operations writes to the log file."
     );
 
+    public static final ConfigValue<Integer> DATABASE_SYNC_INTERVAL = ConfigValue.create("Database.Sync_Interval",
+            5,
+            "Sets how often (in seconds) plugin data will be fetched and loaded from the remote database.",
+            "Useless for SQLITE.",
+            "[*] Set to '-1' to disable."
+    );
+
     public static boolean isTopsEnabled() {
         return TOPS_ENABLED.get();
     }
