@@ -9,6 +9,20 @@ import static su.nightexpress.nightcore.util.text.night.wrapper.TagWrappers.*;
 
 public class Config {
 
+    public static final ConfigValue<String> DATABASE_TYPE = ConfigValue.create("Database.Type",
+        "MYSQL",
+        "Sets database type.",
+        "Available values: MYSQL, SQLITE."
+    );
+
+    public static final ConfigValue<Integer> DATABASE_SYNC_INTERVAL = ConfigValue.create("Database.Sync_Interval",
+        5,
+        "Sets how often (in seconds) plugin data will be fetched and loaded from the remote database.",
+        "Useless for SQLITE.",
+        "Set to '-1' to disable.",
+        "[Asynchronous]"
+    );
+
     public static final ConfigValue<Boolean> GENERAL_PLACEHOLDER_API_FOR_CURRENCY_FORMAT = ConfigValue.create("General.PlaceholderAPI_For_Currency_Format",
         true,
         "Sets whether to apply PlaceholderAPI placeholders for currency 'Format' setting.",
